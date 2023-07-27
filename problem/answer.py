@@ -15,6 +15,7 @@ add codes here
 
 from quri_parts.openfermion.operator import operator_from_openfermion_op
 from openfermion.transforms import jordan_wigner
+from openfermion.utils import load_operator
 
 from quri_parts.algo.ansatz import HardwareEfficientReal
 from quri_parts.algo.optimizer import Adam, OptimizerStatus, LBFGS
@@ -186,7 +187,7 @@ class RunAlgorithm:
         n_qubits = 2 * n_site
         ham = load_operator(
             file_name=f"{n_qubits}_qubits_H_5",
-            data_directory="../hamiltonian",
+            data_directory="../hamiltonian/hamiltonian_samples/",
             plain_text=False,
         )
         jw_hamiltonian = jordan_wigner(ham)
