@@ -2,15 +2,7 @@ import sys
 from typing import Any
 
 sys.path.append("../")
-from utils.challenge_2023 import ChallengeSampling
-
-challenge_sampling = ChallengeSampling(noise=True)
-
-import sys
-from typing import Any
-
-sys.path.append("../")
-from utils.challenge_2023 import ChallengeSampling
+from utils.challenge_2023 import ChallengeSampling, TimeExceededError
 
 challenge_sampling = ChallengeSampling(noise=True)
 
@@ -75,7 +67,7 @@ def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer):
                 print(f"qpu_time {challenge_sampling.total_quantum_circuit_time}")
             print(opt_state.cost)
             
-        except QuantumCircuitTimeExceededError:
+        except TimeExceededError:
             print("Reached the limit of shots")
             return opt_state, prev_params
 
