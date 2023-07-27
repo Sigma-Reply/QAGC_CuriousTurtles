@@ -20,9 +20,14 @@ add codes here
 ####################################
 """
 
+print("answer loaded")
+
 from quri_parts.openfermion.operator import operator_from_openfermion_op
 from openfermion.transforms import jordan_wigner
 from openfermion.utils import load_operator
+
+from quri_parts.core.state import ParametricCircuitQuantumState
+from quri_parts.core.estimator.gradient import parameter_shift_gradient_estimates
 
 from quri_parts.algo.ansatz import HardwareEfficientReal
 from quri_parts.algo.optimizer import Adam, OptimizerStatus, LBFGS
