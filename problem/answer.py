@@ -64,8 +64,6 @@ def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer, num_ex
         try:
             opt_state = optimizer.step(opt_state, c_fn, g_fn)
             print(f"iteration {opt_state.niter}")
-            if (opt_state.niter%10 == 0 ):
-                print(f"qpu_time {challenge_sampling.total_quantum_circuit_time}")
             print(opt_state.cost)
             
         except QuantumCircuitTimeExceededError:
