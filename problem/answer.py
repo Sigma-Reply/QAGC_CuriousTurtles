@@ -6,13 +6,6 @@ from utils.challenge_2023 import ChallengeSampling
 
 challenge_sampling = ChallengeSampling(noise=True)
 
-import sys
-from typing import Any
-
-sys.path.append("../")
-from utils.challenge_2023 import ChallengeSampling
-
-challenge_sampling = ChallengeSampling(noise=True)
 
 """
 ####################################
@@ -46,7 +39,7 @@ def cost_fn(hamiltonian, parametric_state, param_values, estimator):
     return estimate[0].value.real
 
 
-def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer):
+def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer, num_exec=3):
     opt_state = optimizer.get_init_state(init_params)
     
     def c_fn(param_values):
@@ -60,7 +53,7 @@ def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer):
 
     prev_params = []
 
-    for _ in range(3):
+    for _ in range(num_exec):
 
         try:
             opt_state = optimizer.step(opt_state, c_fn, g_fn)
@@ -245,25 +238,29 @@ class RunAlgorithm:
         # Find basis for subspace diagonalisation
         ordered_hamiltonian = translate_and_order(hamiltonian,n_qubits)
         basis_element = search_basis_element(ordered_hamiltonian)
-        #print(basis_element)
-        #YXIIIIXX for 8_qubit_H_5
         
         # Subspace diagonalisation
+
+        values_vqe = []
+        for _ in range(15):
+            values_vqe.append(cost_fn(hamiltonian,parametric_state,params_circuit,sampling_estimator,))
+        vqe_val = min(values_vqe)
+
+
         basis = ['IIIIIIII',basis_element]
         values = []
 
-        for _ in range(25):
-            S = S_mat(parametric_state,params_circuit,sampling_estimator,basis)
-            D = D_mat(parametric_state,params_circuit,sampling_estimator,basis,hamiltonian)
+        while True:
+            print(challenge_sampling.total_quantum_circuit_time)
+            try:
+                S = S_mat(parametric_state,params_circuit,sampling_estimator,basis)
+                D = D_mat(parametric_state,params_circuit,sampling_estimator,basis,hamiltonian)
 
-            vals = eigh(D,S, eigvals_only=True)
-            values.append(vals[0])
-
-
-        values_vqe = []
-        for _ in range(10):
-            values_vqe.append(cost_fn(hamiltonian,parametric_state,params_circuit,sampling_estimator,))
-        vqe_val = min(values_vqe)
+                vals = eigh(D,S, eigvals_only=True)
+                values.append(vals[0])
+                
+            except QuantumCircuitTimeExceededError:
+                break
 
         eta_plus = 0.075
         eta_moins = 0.075
