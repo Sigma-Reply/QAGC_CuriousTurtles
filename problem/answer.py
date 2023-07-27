@@ -30,11 +30,12 @@ from quri_parts.core.measurement import bitwise_commuting_pauli_measurement
 from quri_parts.core.sampling.shots_allocator import (
     create_equipartition_shots_allocator,
 )
-from scipy.linalg import eigh
+from scipy.linalg import eigh # just for subspace diagonalisation :)
+import numpy as np
 
 from quri_parts.core.operator import PAULI_IDENTITY
 from quri_parts.core.operator.operator import Operator
-from  quri_parts.core.operator import pauli_product
+from quri_parts.core.operator import pauli_product
 from quri_parts.core.operator import pauli_label
    
 
@@ -83,6 +84,26 @@ def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer):
 
     return opt_state, prev_params
 
+def translate_and_order(hamiltonian,n_qubits):
+    translated_hamiltonian = {}
+    for paulilabel,v in hamiltonian.items():
+        pw=["I"]*n_qubits
+        for i in paulilabel.qubit_indices():
+            if(paulilabel.pauli_at(i) == 1):
+                pw[i] = "X"
+            elif(paulilabel.pauli_at(i) == 2):
+                pw[i] = "Y"
+            else:
+                pw[i] = "Z"
+        translated_hamiltonian[(''.join(pw))] = v
+        ordered_hamiltonian = dict(sorted(translated_hamiltonian.items(), key=lambda x: np.abs(x[1]), reverse=True))
+    return ordered_hamiltonian
+
+def search_basis_element(ordered_hamiltonian):
+    # Return pauli word with highest coefficient and a low enough overlap with the identity (and no pauliZ, too instable)
+    for pauli in ordered_hamiltonian:
+        if(pauli.count('I') < 5 and 'Z' not in pauli):
+            return pauli
 
 def expectation_value_H(parametric_state, params_circuit, sampling_estimator,P1,P2, H=Operator({PAULI_IDENTITY: 1.})):
 
@@ -221,8 +242,14 @@ class RunAlgorithm:
         )
         params_circuit = prev_params[-1]
 
-        # Subspace diagonalisationT
-        basis = ['IIIIIIII','IIIYXIXX']
+        # Find basis for subspace diagonalisation
+        ordered_hamiltonian = translate_and_order(hamiltonian,n_qubits)
+        basis_element = search_basis_element(ordered_hamiltonian)
+        #print(basis_element)
+        #YXIIIIXX for 8_qubit_H_5
+        
+        # Subspace diagonalisation
+        basis = ['IIIIIIII',basis_element]
         values = []
 
         for _ in range(25):
