@@ -45,7 +45,7 @@ def cost_fn(hamiltonian, parametric_state, param_values, estimator):
     return estimate[0].value.real
 
 
-def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer, num_exec=3):
+def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer, num_exec=1):
     opt_state = optimizer.get_init_state(init_params)
     
     def c_fn(param_values):
@@ -105,7 +105,7 @@ def search_basis_element(ordered_hamiltonian):
 def expectation_value_H(parametric_state, params_circuit, sampling_estimator,P1,P2, H=Operator({PAULI_IDENTITY: 1.})):
 
     if(P1 == 'I'*len(P1)):
-        p1 = quri_parts.core.operator.pauli.PAULI_IDENTITY
+        p1 = PAULI_IDENTITY
     else:
         s_p1 = ""
         for i,ps in enumerate(P1):
@@ -114,7 +114,7 @@ def expectation_value_H(parametric_state, params_circuit, sampling_estimator,P1,
         p1 = pauli_label(s_p1)
 
     if(P2 == 'I'*len(P2)):
-        p2 = quri_parts.core.operator.pauli.PAULI_IDENTITY
+        p2 = PAULI_IDENTITY
     else:
         s_p2 = ""
         for i,ps in enumerate(P2):
@@ -239,6 +239,7 @@ class RunAlgorithm:
         )
         params_circuit = prev_params[-1]
 
+        print("#### IQAE part ####")
         # Find basis for subspace diagonalisation
         ordered_hamiltonian = translate_and_order(hamiltonian,n_qubits)
         basis_element = search_basis_element(ordered_hamiltonian)
@@ -254,8 +255,12 @@ class RunAlgorithm:
         basis = ['IIIIIIII',basis_element]
         values = []
 
-        while True:
-            print(challenge_sampling.total_quantum_circuit_time)
+        acc = -1
+        while True: # We use all the time available to accumulate statistics
+            time = challenge_sampling.total_quantum_circuit_time
+            if(int(time/100) > acc):
+                acc+=1
+                print("Finished in ",10-acc)
             try:
                 S = S_mat(parametric_state,params_circuit,sampling_estimator,basis)
                 D = D_mat(parametric_state,params_circuit,sampling_estimator,basis,hamiltonian)
