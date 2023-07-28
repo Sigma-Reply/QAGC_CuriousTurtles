@@ -62,8 +62,8 @@ def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer, num_ex
 
         try:
             opt_state = optimizer.step(opt_state, c_fn, g_fn)
-            print(f"iteration {opt_state.niter}")
-            print(opt_state.cost)
+            print(f"iteration {opt_state.niter} / num_exec")
+            # print(opt_state.cost)
             
         except TimeExceededError:
             print("Reached the limit of shots")
@@ -225,6 +225,7 @@ class RunAlgorithm:
 
 
         # Optimisation
+        print("#### VQE part ####")
         adam_optimizer = Adam(ftol=10e-5)
 
         init_param = np.random.rand(circuit.parameter_count) * 2 * np.pi * 0.001
