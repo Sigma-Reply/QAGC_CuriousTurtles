@@ -45,7 +45,7 @@ def cost_fn(hamiltonian, parametric_state, param_values, estimator):
     return estimate[0].value.real
 
 
-def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer, num_exec=1):
+def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer, num_exec=3):
     opt_state = optimizer.get_init_state(init_params)
     
     def c_fn(param_values):
@@ -247,9 +247,10 @@ class RunAlgorithm:
         # Subspace diagonalisation
 
         values_vqe = []
-        for _ in range(15):
-            values_vqe.append(cost_fn(hamiltonian,parametric_state,params_circuit,sampling_estimator,))
-        vqe_val = min(values_vqe)
+        for _ in range(20):
+            values_vqe.append(cost_fn(hamiltonian,parametric_state,params_circuit,sampling_estimator))
+        
+        vqe_val = np.mean(np.sort(values_vqe)[1:5])
 
 
         basis = ['IIIIIIII',basis_element]
@@ -272,12 +273,17 @@ class RunAlgorithm:
                 break
 
         eta_plus = 0.075
-        eta_moins = 0.075
+        eta_moins = 0.05
 
         values_close = []
         for i in values:
             if i>(1+eta_plus)*vqe_val and i<(1-eta_moins)*vqe_val:
                 values_close.append(i)
+
+        print(values_vqe)
+        print(vqe_val)
+        print(values)
+        print(values_close)
 
         if len(values_close)==0:
             return vqe_val
