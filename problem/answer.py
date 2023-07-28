@@ -13,7 +13,6 @@ add codes here
 ####################################
 """
 
-print("answer loaded")
 
 from quri_parts.openfermion.operator import operator_from_openfermion_op
 from openfermion.transforms import jordan_wigner
@@ -280,10 +279,6 @@ class RunAlgorithm:
             if i>(1+eta_plus)*vqe_val and i<(1-eta_moins)*vqe_val:
                 values_close.append(i)
 
-        print(values_vqe)
-        print(vqe_val)
-        print(values)
-        print(values_close)
 
         if len(values_close)==0:
             return vqe_val
