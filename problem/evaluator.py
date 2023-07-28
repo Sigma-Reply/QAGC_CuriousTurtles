@@ -6,7 +6,7 @@ from typing import Optional
 
 from answer import RunAlgorithm
 
-num_exec = 1
+num_exec = 3
 ref_value = -8.42442890089805  #: reference value of 8 qubits
 
 """
