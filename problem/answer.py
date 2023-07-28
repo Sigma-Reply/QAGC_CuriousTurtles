@@ -62,7 +62,7 @@ def vqe(hamiltonian, parametric_state, estimator, init_params, optimizer, num_ex
 
         try:
             opt_state = optimizer.step(opt_state, c_fn, g_fn)
-            print(f"iteration {opt_state.niter} / num_exec")
+            print(f"iteration {opt_state.niter} / {num_exec}")
             # print(opt_state.cost)
             
         except TimeExceededError:
